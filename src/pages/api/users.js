@@ -6,28 +6,54 @@ const handler = nextConnect();
 handler.use(middleware);
 
 handler.get(async (req, res) => {
-    const { date } = req.query;
-
+    const { id } = req.query;
+    const collection = req.db.collection('users')
     let doc = {}
 
-    if (date) {
-        doc = await req.db.collection('users').findOne({ date: new Date(date) })
+    if (id) {
+        doc = await collection.findOne(id)
     } else {
-        doc = await req.db.collection('users').findOne()
+        doc = await collection.find({})
+            .toArray();
     }
 
     res.json(doc)
-
-    res.status(200).json({ name: 'John Doe' })
 });
 
 handler.post(async (req, res) => {
-    let data = req.body
-    data = JSON.parse(data);
-    data.date = new Date(data.date);
-    let doc = await req.db.collection('users').updateOne({ date: new Date(data.date) }, { $set: data }, { upsert: true })
+    try {
+        let input = req.body
+        let data = await req.db.collection('users').insertOne(input)
+        return res.json({
+            message: 'data added successfully',
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        // return an error
+        return res.json({
+            message: new Error(error).message,
+            success: false,
+        });
+    }
+})
 
-    res.json({ message: 'ok', doc });
+handler.put(async (req, res) => {
+    try {
+        let input = req.body
+        let data = await req.db.collection('users').updateOne(input)
+        return res.json({
+            message: 'data added successfully',
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        // return an error
+        return res.json({
+            message: new Error(error).message,
+            success: false,
+        });
+    }
 })
 
 export default handler;
