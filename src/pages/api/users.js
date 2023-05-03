@@ -1,5 +1,6 @@
 import nextConnect from 'next-connect';
 import middleware from '../../../middleware/database';
+import { ObjectId } from 'mongodb';
 
 const handler = nextConnect();
 
@@ -11,7 +12,7 @@ handler.get(async (req, res) => {
     let doc = {}
 
     if (id) {
-        doc = await collection.findOne(id)
+        doc = await collection.findOne({_id:new ObjectId(id)})
     } else {
         doc = await collection.find({})
             .toArray();
